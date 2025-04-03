@@ -1,14 +1,10 @@
-package com.todo.voice.util;
+package com.todo.voice.analyzers;
 
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.CharArraySet;
-import org.apache.lucene.analysis.StopFilter;
-import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.*;
 import org.apache.lucene.analysis.core.WhitespaceTokenizer;
 import org.apache.lucene.analysis.en.PorterStemFilter;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 
-import javax.swing.text.AttributeSet;
 import java.io.IOException;
 import java.util.Set;
 
@@ -24,6 +20,20 @@ public class MyAnalyzer extends Analyzer {
     protected TokenStreamComponents createComponents(String s) {
         WhitespaceTokenizer tokenizer = new WhitespaceTokenizer();
         TokenStream tokenStream=new StopFilter(tokenizer,stopWords);
+        tokenStream=new TokenFilter(tokenStream) {
+            @Override
+            public boolean incrementToken() throws IOException {
+                if(!input.incrementToken()) {
+                    return false;
+                }
+                CharTermAttribute charTermAttribute=getAttribute(CharTermAttribute.class);
+                String term=charTermAttribute.toString();
+                if(protectedWords.contains(term)){
+                    return false;
+                }
+                return true;
+            }
+        };
         tokenStream=new PorterStemFilter(tokenStream);
         return new TokenStreamComponents(tokenizer,tokenStream);
     }

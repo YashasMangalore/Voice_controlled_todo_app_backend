@@ -1,12 +1,10 @@
 package com.todo.voice.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.CreationTimestamp;
 
 @Data
 @Entity
@@ -16,10 +14,14 @@ public class Task {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
     String operation;
+    @Column(columnDefinition = "TEXT")
     String task;
     String urgency;
     String dateTime;
 
-    String createdTime;
-    String updatedTime;
+    @CreationTimestamp
+    @Column(updatable = false)
+    String createdAt;
+    @CreationTimestamp
+    String updatedAt;
 }
