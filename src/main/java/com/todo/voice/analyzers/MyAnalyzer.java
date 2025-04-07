@@ -1,9 +1,11 @@
 package com.todo.voice.analyzers;
 
+import com.todo.voice.util.StemmerHelper;
 import org.apache.lucene.analysis.*;
 import org.apache.lucene.analysis.core.WhitespaceTokenizer;
 import org.apache.lucene.analysis.en.PorterStemFilter;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.springframework.data.util.Pair;
 
 import java.io.IOException;
 import java.util.Set;
@@ -28,10 +30,7 @@ public class MyAnalyzer extends Analyzer {
                 }
                 CharTermAttribute charTermAttribute=getAttribute(CharTermAttribute.class);
                 String term=charTermAttribute.toString();
-                if(protectedWords.contains(term)){
-                    return false;
-                }
-                return true;
+                return !protectedWords.contains(term);
             }
         };
         tokenStream=new PorterStemFilter(tokenStream);
@@ -40,19 +39,23 @@ public class MyAnalyzer extends Analyzer {
 
     public String stem(String text){
         if(text==null|| text.isBlank()){
-            return null;
+            return text;
         }
-        StringBuilder result=new StringBuilder();
+        Pair<String,String> placeholders= StemmerHelper.getPlaceholders(text,protectedWords);
+        text= placeholders.getFirst();
         try(TokenStream tokenStream=tokenStream(null,text)){
+            StringBuilder result=new StringBuilder();
             CharTermAttribute charTermAttribute=tokenStream.getAttribute(CharTermAttribute.class);
             tokenStream.reset();
             while(tokenStream.incrementToken()){
                 result.append(charTermAttribute.toString()).append(" ");
             }
             tokenStream.end();
+            String stemmedText=result.toString();
+            stemmedText = stemmedText.replace("_PLACEHOLDER_", placeholders.getSecond());
+            return stemmedText.trim();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return result.toString();
     }
 }
