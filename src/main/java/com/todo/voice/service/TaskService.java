@@ -5,9 +5,9 @@ import java.util.List;
 
 
 public interface TaskService {
-    Task createTask(Task task);
+    Task createTask(String operation,String task,String urgency,String dateTime);
     Task getTask(Long id);
     List<Task> getAllTasks();
-    Task updateTask(Long id, Task task);
+    Task updateTask(Long id, String operation,String task,String urgency,String dateTime);
     Boolean deleteTask(Long id);
 }

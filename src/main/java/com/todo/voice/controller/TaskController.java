@@ -1,8 +1,11 @@
 package com.todo.voice.controller;
 
+import com.todo.voice.analyzers.MyAnalyzer;
 import com.todo.voice.model.Task;
 import com.todo.voice.service.TaskService;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,9 +15,11 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 @RequestMapping("/api/task")
 public class TaskController {
     final TaskService taskService;
+    final MyAnalyzer myAnalyzer;
     @PostMapping("/add")
     public ResponseEntity<Task> createTask(@RequestBody Task task){
         if(task==null)

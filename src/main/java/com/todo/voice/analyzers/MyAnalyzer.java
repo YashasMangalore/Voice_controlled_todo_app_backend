@@ -6,10 +6,12 @@ import org.apache.lucene.analysis.core.WhitespaceTokenizer;
 import org.apache.lucene.analysis.en.PorterStemFilter;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.springframework.data.util.Pair;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.Set;
 
+@Component
 public class MyAnalyzer extends Analyzer {
     private final CharArraySet stopWords;
     private final Set<String> protectedWords;

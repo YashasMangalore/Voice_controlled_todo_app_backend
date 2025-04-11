@@ -1,5 +1,6 @@
 package com.todo.voice.service.impl;
 
+import com.todo.voice.analyzers.MyAnalyzer;
 import com.todo.voice.model.Task;
 import com.todo.voice.repository.TaskRepository;
 import com.todo.voice.service.TaskService;
@@ -16,10 +17,16 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class TaskServiceImpl implements TaskService {
     final TaskRepository taskRepository;
+    final MyAnalyzer myAnalyzer;
     @Override
-    public Task createTask(Task task) {
-        taskRepository.save(task);
-        return task;
+    public Task createTask(String operation,String task,String urgency,String dateTime) {
+        String newTask=myAnalyzer.stem(task);
+        return taskRepository.save( Task.builder()
+                .operation(operation)
+                .urgency(urgency)
+                .dateTime(dateTime)
+                .task(newTask)
+                .build());
     }
 
     @Override
@@ -33,11 +40,16 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public Task updateTask(Long id, Task task) {
+    public Task updateTask(Long id, String operation,String task,String urgency,String dateTime) {
         Task existingTask=taskRepository.findById(id).orElse(null);
         if(existingTask!=null){
-            taskRepository.save(task);
-            return task;
+            String newTask=myAnalyzer.stem(task);
+            existingTask.setTask(newTask);
+            existingTask.setOperation(operation);
+            existingTask.setUpdatedAt(urgency);
+            existingTask.setDateTime(dateTime);
+
+            return taskRepository.save(existingTask);
         }
         return null;
     }
