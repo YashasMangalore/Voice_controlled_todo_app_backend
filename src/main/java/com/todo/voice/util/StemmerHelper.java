@@ -6,7 +6,7 @@ import java.util.Set;
 
 public class StemmerHelper {
     public static Pair<String,String> getPlaceholders(String text, Set<String> protectedWords){
-        String variable=null;
+        String variable="";
         for(String term:protectedWords){
             if(text.contains(term)){
                 variable=term;
