@@ -9,9 +9,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -20,10 +23,11 @@ public class TaskServiceImpl implements TaskService {
     final TaskRepository taskRepository;
     final MyAnalyzer myAnalyzer;
     @Override
-    public Task createTask(String operation,String task,String urgency,String dateTime) {
+    public Task createTask(String operation,String task,String urgency,String dateTime, Long userId) {
         String newTask=myAnalyzer.stem(task);
         return taskRepository.save( Task.builder()
                 .operation(operation)
+                .id(userId)
                 .urgency(urgency)
                 .dateTime(dateTime)
                 .task(newTask)
@@ -68,5 +72,53 @@ public class TaskServiceImpl implements TaskService {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public List<Task> getTasksByDateRange(Long userId, Integer days) {
+        Optional<List<Task>> tasks=taskRepository.findAllById(userId);
+        List<Task> tasks1=tasks.get();
+        if(days==null || days<=0){
+            return tasks1;
+        }
+        //dd/mm/yyyy
+        LocalDateTime now=LocalDateTime.now();
+        LocalDateTime endDate=now.plusDays(days);
+
+//        List<Task> finalResponse=new ArrayList<>();
+//        for(int i=0;i<tasks1.size();i++){ // .stream()
+//            Task task=tasks1.get(i);
+//            LocalDateTime taskData=parseDatetime(task.getDateTime());
+//            if(taskData!=null &&!taskData.isBefore(now) &&!taskData.isAfter(endDate)) // .filter
+//            {
+//                finalResponse.add(task); //.collect(Collectors.toList());
+//            }
+//        }
+//        return finalResponse;
+
+        return tasks1.stream().filter(task -> {
+            try{
+                LocalDateTime taskData=parseDatetime(task.getDateTime());
+                return taskData!=null &&
+                        !taskData.isBefore(now) &&
+                        !taskData.isAfter(endDate);
+            } catch (Exception e) {
+                return false;
+            }
+        }).collect(Collectors.toList());
+    }
+    private LocalDateTime parseDatetime(String dateTime){
+        if(dateTime==null||dateTime.isEmpty()){
+            return null;
+        }
+        try{
+            return LocalDateTime.parse(dateTime, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        } catch (Exception e) {
+            try{
+                return LocalDateTime.parse(dateTime, DateTimeFormatter.ISO_DATE_TIME);
+            } catch (Exception ex) {
+                throw new IllegalArgumentException("Illegal Date Time format "+ex);
+            }
+        }
     }
 }

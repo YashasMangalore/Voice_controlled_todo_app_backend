@@ -13,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,7 +32,7 @@ public class TaskController {
         {
             throw new RuntimeException();
         }
-        Task createdTask=taskService.createTask(task.getOperation(),task.getTask(),task.getUrgency(),task.getDateTime());
+        Task createdTask=taskService.createTask(task.getOperation(),task.getTask(),task.getUrgency(),task.getDateTime(),task.getId());
         if(createdTask!=null && createdTask.getId()!=null){
             Optional<User> user=userRepository.findById(createdTask.getId());
             user.ifPresent(userData->notificationService.sendTaskNotification(createdTask,userData,false));
@@ -46,17 +45,11 @@ public class TaskController {
         List<Task> tasks=taskService.getTaskByUserId(userId);
         return ResponseEntity.ok(tasks);
     }
-
-//    @GetMapping("/find/{id}")
-//    public ResponseEntity<Task> getTaskB(@PathVariable Long id){
-//
-//        Task createdTask=taskService.getTask(id);
-//        if(createdTask==null)
-//        {
-//            throw new RuntimeException();
-//        }
-//        return ResponseEntity.ok(createdTask);
-//    }
+    @GetMapping("/filter")
+    public ResponseEntity<List<Task>> getTasksByDateRange(@RequestParam(required = true) Long userId, @RequestParam(required = false) Integer days){
+        List<Task> tasks=taskService.getTasksByDateRange(userId,days);
+        return ResponseEntity.ok(tasks);
+    }
 
     @PutMapping("/update/{id}")
     public ResponseEntity<Task> updateTask(@PathVariable Long id, @RequestBody Task task){
@@ -71,6 +64,7 @@ public class TaskController {
         }
         return ResponseEntity.ok(createdTask);
     }
+
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> deleteTask(Long id){
         Boolean createdTask=taskService.deleteTask(id);
@@ -81,3 +75,15 @@ public class TaskController {
         return new ResponseEntity<>("Successfully deleted task with id: "+id, HttpStatus.ACCEPTED);
     }
 }
+
+
+//    @GetMapping("/find/{id}")
+//    public ResponseEntity<Task> getTaskB(@PathVariable Long id){
+//
+//        Task createdTask=taskService.getTask(id);
+//        if(createdTask==null)
+//        {
+//            throw new RuntimeException();
+//        }
+//        return ResponseEntity.ok(createdTask);
+//    }

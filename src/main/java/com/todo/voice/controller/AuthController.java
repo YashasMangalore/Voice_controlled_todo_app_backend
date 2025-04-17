@@ -6,7 +6,6 @@ import com.todo.voice.repository.UserRepository;
 import com.todo.voice.service.JwtService;
 import com.todo.voice.service.UserService;
 import com.todo.voice.util.UserHelper;
-import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -44,7 +43,6 @@ public class AuthController {
                             return ResponseEntity.ok(response);
                         }).orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
             }
-
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("");
     }
